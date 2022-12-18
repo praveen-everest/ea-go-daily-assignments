@@ -20,16 +20,20 @@ func recordRequest(req *http.Request) *httptest.ResponseRecorder {
 	return rec
 }
 
+func UnmarshalBody(buffer *bytes.Buffer, value any) {
+	data, _ := io.ReadAll(buffer)
+
+	_ = json.Unmarshal(data, value)
+}
+
 func TestGetAllBooksEndpoint(t *testing.T) {
 	req := httptest.NewRequest("GET", "/book", nil)
 	rec := recordRequest(req)
 
 	assert.Equal(t, 200, rec.Code)
 
-	body := rec.Body
-	data, _ := io.ReadAll(body)
 	var actual []Book
-	_ = json.Unmarshal(data, &actual)
+	UnmarshalBody(rec.Body, &actual)
 	assert.Equal(t, books, actual)
 }
 
@@ -39,10 +43,8 @@ func TestGetBookByIdEndpoint(t *testing.T) {
 
 	assert.Equal(t, 200, rec.Code)
 
-	body := rec.Body
-	data, _ := io.ReadAll(body)
 	var book Book
-	_ = json.Unmarshal(data, &book)
+	UnmarshalBody(rec.Body, &book)
 
 	expected := Book{2, "Learn Go!", 90}
 	assert.Equal(t, expected, book)
@@ -70,11 +72,10 @@ func TestAddBookEndpoint(t *testing.T) {
 
 	assert.Equal(t, 201, rec.Code)
 
-	body := rec.Body
-	data, _ := io.ReadAll(body)
-	expected := Book{}
-	_ = json.Unmarshal(data, &expected)
-	assert.Equal(t, expected, book)
+	actual := Book{}
+	UnmarshalBody(rec.Body, &actual)
+
+	assert.Equal(t, book, actual)
 }
 
 func TestAddBookEndpointShouldFailForInvalidInput(t *testing.T) {
@@ -85,4 +86,38 @@ func TestAddBookEndpointShouldFailForInvalidInput(t *testing.T) {
 	rec := recordRequest(req)
 
 	assert.Equal(t, 400, rec.Code)
+}
+
+func TestUpdateBookHandler(t *testing.T) {
+	book := Book{1, "Awesome Go", 110}
+	jsonValue, _ := json.Marshal(book)
+
+	req := httptest.NewRequest("PUT", "/book", bytes.NewBuffer(jsonValue))
+	rec := recordRequest(req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	actual := Book{}
+	UnmarshalBody(rec.Body, &actual)
+
+	assert.Equal(t, book, actual)
+}
+
+func TestUpdateBookHandlerShouldFailIfBookNotFound(t *testing.T) {
+	book := Book{1000, "Awesome Go", 110}
+	jsonValue, _ := json.Marshal(book)
+
+	req := httptest.NewRequest("PUT", "/book", bytes.NewBuffer(jsonValue))
+	rec := recordRequest(req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestUpdateBookHandlerShouldFailForInvalidInput(t *testing.T) {
+	jsonValue := []byte("{\"Title\":\"Go Power\"}")
+
+	req := httptest.NewRequest("PUT", "/book", bytes.NewBuffer(jsonValue))
+	rec := recordRequest(req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }

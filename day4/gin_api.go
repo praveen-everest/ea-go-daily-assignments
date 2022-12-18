@@ -26,6 +26,7 @@ func setUpRouter() *gin.Engine {
 	r.GET("/book/:id", getBookById)
 	r.GET("/book", getAllBooks)
 	r.POST("/book", addBook)
+	r.PUT("/book", updateBook)
 	return r
 }
 
@@ -64,4 +65,22 @@ func addBook(ctx *gin.Context) {
 	books = append(books, book)
 
 	ctx.JSON(http.StatusCreated, book)
+}
+
+func updateBook(ctx *gin.Context) {
+	var book Book
+	err := ctx.BindJSON(&book)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	for i, b := range books {
+		if b.Id == book.Id {
+			books[i] = book
+			ctx.JSON(http.StatusOK, book)
+			return
+		}
+	}
+	ctx.JSON(404, gin.H{})
 }
