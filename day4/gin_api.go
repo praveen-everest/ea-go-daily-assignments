@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"strconv"
 )
 
 type Book struct {
-	Id    int
-	Title string
-	Price float64
+	Id    int     `binding:"required"`
+	Title string  `binding:"required"`
+	Price float64 `binding:"required"`
 }
 
 var books = []Book{
@@ -24,6 +25,7 @@ func setUpRouter() *gin.Engine {
 	r := gin.Default()
 	r.GET("/book/:id", getBookById)
 	r.GET("/book", getAllBooks)
+	r.POST("/book", addBook)
 	return r
 }
 
@@ -48,5 +50,18 @@ func getBookById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(404, gin.H{"message": fmt.Sprintf("book with id %d not found", id)})
-	return
+}
+
+func addBook(ctx *gin.Context) {
+	var book Book
+	err := ctx.BindJSON(&book)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	books = append(books, book)
+
+	ctx.JSON(http.StatusCreated, book)
 }

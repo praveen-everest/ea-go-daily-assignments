@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -41,7 +41,6 @@ func TestGetBookByIdEndpoint(t *testing.T) {
 
 	body := rec.Body
 	data, _ := io.ReadAll(body)
-	fmt.Println(string(data))
 	var book Book
 	_ = json.Unmarshal(data, &book)
 
@@ -59,4 +58,31 @@ func TestGetBookIdShouldReturn404IfBookNotFound(t *testing.T) {
 	data, _ := io.ReadAll(body)
 
 	assert.Equal(t, "{\"message\":\"book with id 1000 not found\"}", string(data))
+}
+
+func TestAddBookEndpoint(t *testing.T) {
+	book := Book{6, "Go Power", 50}
+	jsonValue, _ := json.Marshal(book)
+
+	req := httptest.NewRequest("POST", "/book", bytes.NewBuffer(jsonValue))
+
+	rec := recordRequest(req)
+
+	assert.Equal(t, 201, rec.Code)
+
+	body := rec.Body
+	data, _ := io.ReadAll(body)
+	expected := Book{}
+	_ = json.Unmarshal(data, &expected)
+	assert.Equal(t, expected, book)
+}
+
+func TestAddBookEndpointShouldFailForInvalidInput(t *testing.T) {
+	jsonValue := []byte("{\"Title\":\"Go Power\"}")
+
+	req := httptest.NewRequest("POST", "/book", bytes.NewBuffer(jsonValue))
+
+	rec := recordRequest(req)
+
+	assert.Equal(t, 400, rec.Code)
 }
