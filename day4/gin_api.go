@@ -30,12 +30,6 @@ func setUpRouter() *gin.Engine {
 	return r
 }
 
-func main() {
-	router := setUpRouter()
-
-	_ = router.Run("localhost:8080")
-}
-
 func GetAllBooks(ctx *gin.Context) {
 	ctx.JSON(200, books)
 }
