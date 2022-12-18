@@ -5,10 +5,10 @@ import (
 )
 
 //func main() {
-//	http.HandleFunc("/hello", helloHandler)
+//	http.HandleFunc("/hello", HelloHandler)
 //	_ = http.ListenAndServe("localhost:8080", nil)
 //}
 
-func helloHandler(w http.ResponseWriter, r *http.Request) {
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("Hello Go!"))
 }

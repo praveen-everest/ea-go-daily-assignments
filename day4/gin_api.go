@@ -23,10 +23,10 @@ var books = []Book{
 
 func setUpRouter() *gin.Engine {
 	r := gin.Default()
-	r.GET("/book/:id", getBookById)
-	r.GET("/book", getAllBooks)
-	r.POST("/book", addBook)
-	r.PUT("/book", updateBook)
+	r.GET("/book", GetAllBooks)
+	r.GET("/book/:id", GetBookById)
+	r.POST("/book", AddBook)
+	r.PUT("/book", UpdateBook)
 	return r
 }
 
@@ -36,11 +36,11 @@ func main() {
 	_ = router.Run("localhost:8080")
 }
 
-func getAllBooks(ctx *gin.Context) {
+func GetAllBooks(ctx *gin.Context) {
 	ctx.JSON(200, books)
 }
 
-func getBookById(ctx *gin.Context) {
+func GetBookById(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 
 	for _, book := range books {
@@ -53,7 +53,7 @@ func getBookById(ctx *gin.Context) {
 	ctx.JSON(404, gin.H{"message": fmt.Sprintf("book with id %d not found", id)})
 }
 
-func addBook(ctx *gin.Context) {
+func AddBook(ctx *gin.Context) {
 	var book Book
 	err := ctx.BindJSON(&book)
 
@@ -67,7 +67,7 @@ func addBook(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, book)
 }
 
-func updateBook(ctx *gin.Context) {
+func UpdateBook(ctx *gin.Context) {
 	var book Book
 	err := ctx.BindJSON(&book)
 	if err != nil {

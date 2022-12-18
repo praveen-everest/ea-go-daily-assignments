@@ -11,7 +11,7 @@ func TestHelloHandler(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/hello", nil)
 
-	helloHandler(recorder, r)
+	HelloHandler(recorder, r)
 
 	result := recorder.Result().Body
 	data, _ := io.ReadAll(result)
