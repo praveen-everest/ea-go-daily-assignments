@@ -39,7 +39,7 @@ func TestSavingsAccount_WithDraw(t *testing.T) {
 		{100, nil, 900},
 		{200, nil, 700},
 		{600, nil, 100},
-		{250, NotEnoughFundsError, 100},
+		{250, &NotEnoughFundsError{250, 150, "Savings Account #999"}, 100},
 	} {
 		err := sa.WithDraw(tc.amount)
 		assert.Equal(t, tc.ack, err)

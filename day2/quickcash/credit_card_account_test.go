@@ -39,7 +39,7 @@ func TestCreditCardAccount_WithDraw(t *testing.T) {
 		{10000, nil, 90000},
 		{50000, nil, 40000},
 		{40000, nil, 0},
-		{10000, NotEnoughFundsError, 0},
+		{10000, &NotEnoughFundsError{10000, 10000, "Credit Card Account #XYZ"}, 0},
 	} {
 		err := cca.WithDraw(tc.amount)
 		assert.Equal(t, tc.ack, err)

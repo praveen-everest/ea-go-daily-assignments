@@ -1,7 +1,8 @@
 package quickcash
 
 import (
-	"errors"
+	"fmt"
+	"math"
 )
 
 type CreditCardAccount struct {
@@ -9,13 +10,21 @@ type CreditCardAccount struct {
 	identifier string
 }
 
-var NotEnoughFundsError = errors.New("not enough funds in the account")
+type NotEnoughFundsError struct {
+	requested  float64
+	lacking    float64
+	identifier string
+}
+
+func (nefe *NotEnoughFundsError) Error() string {
+	return fmt.Sprintf("not enough funds in %s. requested %f but needed %f more", nefe.identifier, nefe.requested, nefe.lacking)
+}
 
 func (cca *CreditCardAccount) WithDraw(amount float64) error {
 	if cca.CanWithDraw(amount) {
 		cca.limit -= amount
 	} else {
-		return NotEnoughFundsError
+		return &NotEnoughFundsError{amount, math.Abs(cca.limit - amount), cca.GetIdentifier()}
 	}
 	return nil
 }

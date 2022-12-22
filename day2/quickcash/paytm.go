@@ -1,5 +1,7 @@
 package quickcash
 
+import "math"
+
 type PaytmWallet struct {
 	balance    float64
 	identifier string
@@ -9,7 +11,7 @@ func (pw *PaytmWallet) WithDraw(amount float64) error {
 	if pw.CanWithDraw(amount) {
 		pw.balance -= amount
 	} else {
-		return NotEnoughFundsError
+		return &NotEnoughFundsError{amount, math.Abs(pw.balance - amount), pw.GetIdentifier()}
 	}
 	return nil
 }
